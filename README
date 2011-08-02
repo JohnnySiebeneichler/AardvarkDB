@@ -1,0 +1,12 @@
+Trabalho de implementação de um banco de dados.
+Requisitos:
+
+    * Seja capaz de fazer operações CRUD;
+    * Seguir qualquer paradigma, i.e., relacional, OO ou NoSQL;
+    * Escrito em qualquer linguagem;
+    * Com controle de concorrência;
+    * Grupo de exatamente 4 alunos;
+    * O código hospedado em algum serviço como Github ou SourceForge;
+    * Desenvolvimento uma aplicação exemplo que utilize tal banco e demonstre todas as funcionalidades.
+
+Este trabalho terá peso 7,0 na nota semestral, portanto demandará empenho.
