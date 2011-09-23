@@ -20,12 +20,7 @@ Formato do arquivo de header (strings 0-finalized):
 -Info Páginas
 
 
-
-
-
-
-todo: ler as páginas (calcular tamanho da chave primaria).
-mudar para tabela.h?
+to do: escrever
 separar .cpp dos .h
 
 
@@ -33,15 +28,18 @@ separar .cpp dos .h
 */
 
 
+#include <list>
 #include "erros.h"
 #include "tipos.h"
+
+using namespace std;
 
 #define MAX_STR 255
 
 
 
 //armazena: 4 primeiros bits: tipo, próximos bits booleanos:
-//not_null, unique, primary_key e foreign key.
+//se tem default, not_null, unique, primary_key e foreign key.
 typedef union {
 
 	bool tem_default : 1;
@@ -52,13 +50,17 @@ typedef union {
 }BOOLEANS;
 
 
+
+//como o número total de bytes que a chave primária terá, a lista armazena-a
+//como bytes (unsigned char), assim, seu tamanho deverá ser tam_pk vezes maior
+//que o da lista quant.
 typedef struct {
 
-	int quant;
-	void *menor_pk;
-	void *maior_pk;
+	list<unsigned int> quant;
+	list<unsigned char> menores_pks;
+	list<unsigned char> maiores_pks;
 
-}INFO_PAGINA;
+}INFO_PAGINAS;
 
 
 class header {
@@ -73,10 +75,10 @@ class header {
 	void **defaults;
 
 	unsigned int q_pags;
-	list<INFO_PAGINAS> paginas;
+	INFO_PAGINAS paginas;
 
 	private:
-	int c1, c2, c3;
+	int tam_pk;
 	FILE *ah;
 
 
@@ -88,6 +90,8 @@ class header {
 	*/
 	ERR header(FILE *arq) {
 
+		int c1;
+
 		check_file(arq);
 		ah = arq;
 
@@ -98,12 +102,14 @@ class header {
 
 		alocar_vetores();
 		ERR buff = verificar_vetores();
-		if (buff != SUCESSO) return buff;
+		check_erro(buff);
 		ler_vetores();
 
-//////////////////////////////////////////////////////
+
 		get_n_bytes(ah, &q_pags, sizeof(unsigned int));
-		ler_info_paginas();
+		calcular_tam_pk();
+		buff = ler_info_paginas();
+		check_erro(buff);
 	}
 
 
@@ -139,6 +145,8 @@ class header {
 
 	void ler_vetores() {
 
+		int c1;
+
 		for (c1 = 0; c1 < q_campos; c1++) {
 			fgets(ah, nomes_campos[c1], MAX_STR);
 			//scanf("%u %u %u", &tipos[c1], &booleans[c1],
@@ -162,15 +170,58 @@ class header {
 	}
 
 
+	void calcular_tam_pk() {
+
+		int c1;
+
+		tam_pk = 0;
+
+		for (c1 = 0; c1 < q_campos; c1++) {
+			if (booleans[c1].pk) tam_pk += tamanhos[c1];
+		}
+	}
+
+
+
+	void ler_info_pagina(int pos) {
+		unsigned int uibuff;
+		unsigned char bytebuff;
+		int c1;
+
+		get_n_bytes(ah, &uibuff, sizeof(unsigned int));
+		paginas.quant.push_back(uibuff);
+
+		for (c1 = 0; c1 < tam_pk * 2; c1++) {
+			get_n_bytes(ah, &bytebuff, 1);
+
+			if (c1 / 2) {
+				paginas.menores.push_back(bytebuff);
+			} else {
+				paginas.maiores.push_back(bytebuff);
+			}
+		}
+	}
+
 
 	void ler_info_paginas() {
 
-		INFO_PAGINA buff;
+		int c1;
+
+		paginas.quant.clear();
+		paginas.menores_pks.clear();
+		paginas.maiores_pks.clear();
+
+		for (c1 = 0; c1 < q_pags; c1++) {
+			ler_info_pagina(c1);
+		}
+	}
 
 
-///////////////////////////////////////////
 
 
+
+
+	void escrever_mudancas() {
 
 	}
 };
