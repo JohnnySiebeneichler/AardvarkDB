@@ -1,4 +1,3 @@
-
 #include "header.h"
 
 
@@ -170,4 +169,63 @@ void Header::ler_info_paginas() {
 	}
 }
 
+
+
+/*-Nome da tabela. (string).
+-n = Quantidade de campos. (unsigned int).
+-Nomes dos campos. (n * string).
+-Tipos. (TIPO).
+-Booleans. (byte) (se tem default, not null, unique, se é primary key,
+se é foreign key).
+-Tamanhos. (unsigned int) (para strings).
+-Defaults. (var).
+
+-Quant paginas
+-Info Páginas
+
+*/
+
+ERR criar_arquivo_header(string nome, int q_campos, list<string> nomes,
+list<TIPO> tipos, list<bool> tem_default, list<bool> not_null,
+list<bool> unique, list<bool> pk, list<bool> fk,
+list<unsigned int> tamanhos, list<void *> defaults) {
+	
+	
+	FILE * arq = fopen (nome + ".header","wb");
+	check_file(arq);
+
+	fprintf(arq, "%s", nome);
+	fwrite(&q_campos, sizeof (unsigned int), 1, arq);
+ 	
+ 	BOOLEANS buff;
+	for (int i = 0; i < q_campos, i++){
+		buff.tem_default = tem_default.front();
+		buff.not_null = not_null.front();		
+		buff.unique = unique.front();		
+		buff.pk = pk.front();		
+		buff.fk = fk.front();
+		
+		
+		fwrite(&nomes.front(), MAX_STR, 1, arq);
+		fwrite(&tipos.front(), sizeof(TIPO), 1, arq);
+		fwrite(&buff, sizeof(BOOLEANS), 1, arq);
+		fwrite(&tamanhos.front(), sizeof(unsigned int), 1, arq);		
+		fwrite(defaults.front(), get_tam(tipos.front()), tamanhos.front(), arq);
+		
+		tem_default.pop_front();
+		not_null.pop_front();
+		unique.pop_front();
+		pk.pop_front();
+		fk.pop_front();
+		nomes.pop_front();
+		tipos.pop_front();
+		tamanhos.pop_front();
+		defaults.pop_front();
+		nome.pop_front();
+		q_campos.pop_front();
+	}
+	
+	
+	
+}
 
