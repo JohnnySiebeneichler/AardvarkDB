@@ -163,5 +163,27 @@ class Header {
 
 
 
+/**
+ * Esta função irá criar o arquivo de header das tabelas do
+ * banco de dados com o seguinte formato:
+ * 
+ * -Nome da tabela. (string).
+ * -n = Quantidade de campos. (unsigned int).
+ * -Nomes dos campos. (n * string).
+ * -Tipos. (TIPO).
+ * -Booleans. (byte) (se tem default, not null, unique, se é primary key,
+		se é foreign key).
+ * -Tamanhos. (unsigned int) (para strings).
+ * -Defaults. (var).
+ * 
+ * Para os defaults, colunas sem default tem um ponteiro null.
+ */
+ERR criar_arquivo_header(string nome, int q_campos, list<string> nomes,
+	list<TIPO> tipos, list<bool> tem_default, list<bool> not_null,
+	list<bool> unique, list<bool> pk, list<bool> fk,
+	list<unsigned int> tamanhos, list<void *> defaults);
+
+
+
 
 #endif
