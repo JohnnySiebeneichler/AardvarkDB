@@ -86,18 +86,19 @@ size_t get_tam(TIPO t) {
 	}
 }
 
-
+/*
 
 void ler_string(FILE *f, void *v, TIPO t, int n) {
 
-	int c, pos;
+	int c, *pos;
 
 	for (c = 0; c < n; c++) {
-		pos = (v + (c * tam));
-		get_n_bytes(f, pos, tam);
+		pos = (v + (c * get_tam(t)));
+		//get_n_bytes(f, pos, tam);
+		fwrite(&pos, sizeof(int), 1, f);
 		if (*pos == 0 && is_var(t)) break;
 	}
-}
+}*/
 
 
 void ler_valor(FILE *f, void *v, TIPO t, int n) {
@@ -114,10 +115,12 @@ void ler_valor(FILE *f, void *v, TIPO t, int n) {
 	case fixchar_utf8: //
 	case fixchar_utf16: //
 	case fixchar_utf32: {//
-		ler_string(f, v, t, n);
+		//ler_string(f, v, t, n);
+		fwrite(v, get_tam(t), n, f);
 		break;
 	}
-	default: get_n_bytes(f, v,get_tam(t));
+	//default: get_n_bytes(f, v,get_tam(t));
+	default: fwrite(v, get_tam(t), 1, f);
 
 	}
 }

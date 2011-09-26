@@ -27,6 +27,9 @@ separar .cpp dos .h
 
 */
 
+#ifndef HEADER_H
+#define HEADER_H
+
 
 #include <list>
 #include "erros.h"
@@ -38,8 +41,9 @@ using namespace std;
 
 
 
-//armazena: 4 primeiros bits: tipo, próximos bits booleanos:
-//se tem default, not_null, unique, primary_key e foreign key.
+/** armazena booleanos: se tem default, not_null, unique, primary_key e
+	foreign key.
+*/
 typedef union {
 
 	bool tem_default : 1;
@@ -51,9 +55,10 @@ typedef union {
 
 
 
-//como o número total de bytes que a chave primária terá, a lista armazena-a
-//como bytes (unsigned char), assim, seu tamanho deverá ser tam_pk vezes maior
-//que o da lista quant.
+/** Como o número total de bytes que a chave primária terá é variável, a lista
+	armazena-a como bytes (unsigned char), assim, seu tamanho deverá ser
+	tam_pk vezes maior que o da lista quant.
+*/
 typedef struct {
 
 	list<unsigned int> quant;
@@ -63,168 +68,100 @@ typedef struct {
 }INFO_PAGINAS;
 
 
-class header {
-
-	public:
-	char nome_tabela[MAX_STR];
-	unsigned int q_campos;
-	char *nomes_campos[MAX_STR];
-	TIPO *tipos;
-	BOOLEANS *booleans;
-	unsigned int *tamanhos;
-	void **defaults;
-
-	unsigned int q_pags;
-	INFO_PAGINAS paginas;
-
-	private:
-	int tam_pk;
-	FILE *ah;
-
+class Header {
 
 
 	public:
-	/** Lê um arquivo de header em uma estrutura de header.
-		@param arq O arquivo de header.
-		@return Identificador de erro.
-	*/
-	ERR header(FILE *arq) {
+		char nome_tabela[MAX_STR];
+		unsigned int q_campos;
+		char *nomes_campos[MAX_STR];
+		TIPO *tipos;
+		BOOLEANS *booleans;
+		unsigned int *tamanhos;
+		void **defaults;
 
-		int c1;
-
-		check_file(arq);
-		ah = arq;
-
-		fgets(ah, nome_tabela, MAX_STR);
-
-		get_n_bytes(ah, &q_campos, sizeof(unsigned int));
-		if (q_campos == 0) return HEADER_NENHUM_CAMPO;
-
-		alocar_vetores();
-		ERR buff = verificar_vetores();
-		check_erro(buff);
-		ler_vetores();
+		unsigned int q_pags;
+		INFO_PAGINAS paginas;
 
 
-		get_n_bytes(ah, &q_pags, sizeof(unsigned int));
-		calcular_tam_pk();
-		buff = ler_info_paginas();
-		check_erro(buff);
-	}
+		/** Lê um arquivo de header em uma estrutura de header.
+			@param arq O arquivo de header.
+			@return Identificador de erro.
+		*/
+		ERR Header(FILE *arq);
 
 
 
-	/** Desaloca a memória alocada em uma header struct.
-	*/
-	void ~header() {
-		return ERR_NOT_IMPL;
-	}
+		/** Desaloca a memória alocada em uma header struct.
+		*/
+		void ~Header();
+
+
+
+
+
+		/** Salva as mudanças no header.
+		*/
+		void escrever_mudancas();
+
+
+		/** Retorna a quantidade de bits requerida por um registro.
+		*/
+		size_t get_tamanho_registro();
 
 
 
 
 
 	private:
-	void alocar_vetores() {
-		nomes_campos = (char **) malloc(q_campos * sizeof(char)
-						* MAX_STR);
-		tipos = (TIPO *) malloc(q_campos * sizeof(TIPO));
-		booleans = (BOOLEANS *) malloc(q_campos * sizeof(BOOLEANS));
-		defaults = (void *) malloc(q_campos * sizeof(void *));
-		defaults = (void *) malloc(q_campos * sizeof(unsigned int));
-	}
-
-	ERR verificar_vetores() {
-		check_malloc(nomes_campos);
-		check_malloc(tipos);
-		check_malloc(booleans);
-		check_malloc(defaults);
-		check_malloc(tamanhos);
-		return SUCESSO;
-	}
-
-	void ler_vetores() {
-
-		int c1;
-
-		for (c1 = 0; c1 < q_campos; c1++) {
-			fgets(ah, nomes_campos[c1], MAX_STR);
-			//scanf("%u %u %u", &tipos[c1], &booleans[c1],
-			//	&tamanhos[c1]);
-			get_n_bytes(ah, &tipos[c1], sizeof(TIPO));
-			get_n_bytes(ah, &booleans[c1], sizeof(BOOLEANS));
-			get_n_bytes(ah, &tamanhos[c1], sizeof(unsigned int));
-
-			if (booleans[c1].tem_default) {
-				defaults[c1] = malloc(tamanhos[c1] *
-							get_tam(tipos[c1]);
-				check_malloc(defaults[c1]);
-				get_n_bytes(ah, defaults[c1],
-						get_tam(tipos[c1]));
-
-			}
-			else {
-				defaults[c1] = NULL;
-			}
-		}
-	}
+		int tam_pk;
+		FILE *ah;
 
 
-	void calcular_tam_pk() {
-
-		int c1;
-
-		tam_pk = 0;
-
-		for (c1 = 0; c1 < q_campos; c1++) {
-			if (booleans[c1].pk) tam_pk += tamanhos[c1];
-		}
-	}
+		/** Aloca os vetores que armazenarão os dados do header.
+		*/
+		void alocar_vetores();
 
 
 
-	void ler_info_pagina(int pos) {
-		unsigned int uibuff;
-		unsigned char bytebuff;
-		int c1;
-
-		get_n_bytes(ah, &uibuff, sizeof(unsigned int));
-		paginas.quant.push_back(uibuff);
-
-		for (c1 = 0; c1 < tam_pk * 2; c1++) {
-			get_n_bytes(ah, &bytebuff, 1);
-
-			if (c1 / 2) {
-				paginas.menores.push_back(bytebuff);
-			} else {
-				paginas.maiores.push_back(bytebuff);
-			}
-		}
-	}
+		/** Verifica se os vetores foram alocados corretamente.
+		*/
+		ERR verificar_vetores();
 
 
-	void ler_info_paginas() {
 
-		int c1;
+		/** Lê os valores das características das tuplas e armazena-os
+			nos vetores.
+		*/
+		void ler_vetores();
 
-		paginas.quant.clear();
-		paginas.menores_pks.clear();
-		paginas.maiores_pks.clear();
 
-		for (c1 = 0; c1 < q_pags; c1++) {
-			ler_info_pagina(c1);
-		}
-	}
+
+
+		/** Calcula a quantidade total de bytes que serão necessários
+			para armazenar todos dados da chave primária.
+		*/
+		void calcular_tam_pk();
+
+
+		/** Lê o dado de um único conjunto de informação sobre uma pá-
+			gina que consiste de: quantidade de registros na pági-
+			na, menor chave primária, e maior chave primária).
+		*/
+		void ler_info_pagina();
 
 
 
 
 
+		/** Iterador para ler todos info_pagina no arquivo.
+		*/
+		void ler_info_paginas();
 
-	void escrever_mudancas() {
 
-	}
 };
 
 
 
+
+#endif
