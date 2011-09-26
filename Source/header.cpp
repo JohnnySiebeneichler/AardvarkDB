@@ -221,9 +221,13 @@ list<unsigned int> tamanhos, list<void *> defaults) {
 		tipos.pop_front();
 		tamanhos.pop_front();
 		defaults.pop_front();
-		nome.pop_front();
-		q_campos.pop_front();
 	}
+	
+	unsigned int buff2 = 0;
+	
+	fwrite(&buff2, sizeof(unsigned int), 1, arq);
+	
+	fclose(arq);
 	
 	
 	
