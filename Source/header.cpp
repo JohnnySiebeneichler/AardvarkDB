@@ -1,34 +1,37 @@
 #include "header.h"
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
 
-
-ERR Header::Header(FILE *arq) {
+/* Constructor returning values? Hell no */
+Header::Header(FILE *arq) {
 	int c1;
 
-	check_file(arq);
+	//check_file(arq);
 	ah = arq;
 
-	fgets(ah, nome_tabela, MAX_STR);
+	fgets(nome_tabela, MAX_STR, ah);
 
 	//get_n_bytes(ah, &q_campos, sizeof(unsigned int));
 	fwrite(&q_campos, sizeof(unsigned int), 1, ah);
-	if (q_campos == 0) return HEADER_NENHUM_CAMPO;
+	/* FIXME: if (q_campos == 0) return HEADER_NENHUM_CAMPO; */
 
 	alocar_vetores();
 	ERR buff = verificar_vetores();
-	check_erro(buff);
+	//check_erro(buff);
 	ler_vetores();
 
 
 	//get_n_bytes(ah, &q_pags, sizeof(unsigned int));
 	fwrite(&q_pags, sizeof(unsigned int), 1, ah);
 	calcular_tam_pk();
-	buff = ler_info_paginas();
-	check_erro(buff);
+	//buff = ler_info_paginas();
+	//check_erro(buff);
 }
 
 
 
-void Header::~Header() {
+Header::~Header() {
 
 	int c;
 
@@ -49,7 +52,7 @@ void Header::~Header() {
 
 void Header::escrever_mudancas() {
 
-	return ERR_NOT_IMPL;
+	/* FIXME: return ERR_NOT_IMPL; */
 }
 
 
@@ -59,7 +62,7 @@ size_t Header::get_tamanho_registro() {
 	size_t tam = 0;
 
 	for (int c = 0; c < q_campos; c++) {
-		tam += tamanhos[c1];
+		tam += tamanhos[c];
 	}
 
 	return tam;
@@ -67,12 +70,13 @@ size_t Header::get_tamanho_registro() {
 
 
 void Header::alocar_vetores() {
-	nomes_campos = (char **) malloc(q_campos * sizeof(char)
-					* MAX_STR);
+	/* nomes_campos looks like an array of pointers to string with
+	   size = q_campos * MAX_STR. Something is wrong.. */
+	nomes_campos = (char **) malloc(q_campos * sizeof(char)	* MAX_STR);
 	tipos = (TIPO *) malloc(q_campos * sizeof(TIPO));
 	booleans = (BOOLEANS *) malloc(q_campos * sizeof(BOOLEANS));
-	defaults = (void *) malloc(q_campos * sizeof(void *));
-	tamanhos = (void *) malloc(q_campos * sizeof(unsigned int));
+	defaults = (void **) malloc(q_campos * sizeof(void *));
+	tamanhos = (unsigned int *) malloc(q_campos * sizeof(unsigned int));
 }
 
 
@@ -92,7 +96,7 @@ void Header::ler_vetores() {
 	int c1;
 
 	for (c1 = 0; c1 < q_campos; c1++) {
-		fgets(ah, nomes_campos[c1], MAX_STR);
+		fgets(nomes_campos[c1], MAX_STR, ah);
 
 		//get_n_bytes(ah, &tipos[c1], sizeof(TIPO));
 		//get_n_bytes(ah, &booleans[c1], sizeof(BOOLEANS));
@@ -102,8 +106,8 @@ void Header::ler_vetores() {
 		fwrite(&tamanhos[c1], sizeof(unsigned int), 1, ah);
 
 		if (booleans[c1].tem_default) {
-			defaults[c1] = malloc(tamanhos[c1] * get_tam(tipos[c1]);
-			check_malloc(defaults[c1]);
+			defaults[c1] = malloc(tamanhos[c1] * get_tam(tipos[c1]));
+			//check_malloc(defaults[c1]); /* FIXME : return value */
 			//get_n_bytes(ah, defaults[c1],
 			//		get_tam(tipos[c1]));
 			fwrite(&defaults[c1], get_tam(tipos[c1]), 1, ah);
@@ -131,7 +135,7 @@ void Header::calcular_tam_pk() {
 
 
 
-void Header::ler_info_pagina() {
+void Header::ler_info_pagina(int &todo) {
 	unsigned int uibuff;
 	unsigned char bytebuff;
 	int c1;
@@ -146,9 +150,9 @@ void Header::ler_info_pagina() {
 		fwrite(&bytebuff, 1, 1, ah);
 
 		if (c1 / 2) {
-			paginas.menores.push_back(bytebuff);
+			paginas.menores_pks.push_back(bytebuff);
 		} else {
-			paginas.maiores.push_back(bytebuff);
+			paginas.maiores_pks.push_back(bytebuff);
 		}
 	}
 }
@@ -190,15 +194,20 @@ list<TIPO> tipos, list<bool> tem_default, list<bool> not_null,
 list<bool> unique, list<bool> pk, list<bool> fk,
 list<unsigned int> tamanhos, list<void *> defaults) {
 	
+	char nome_arq[255];
 	
-	FILE * arq = fopen (nome + ".header","wb");
+	strcpy(nome_arq, nome.c_str());
+	strcat(nome_arq, ".header");
+	FILE * arq = fopen(nome_arq, "wb");
 	check_file(arq);
 
-	fprintf(arq, "%s", nome);
+	fprintf(arq, "%s", nome.c_str()); /* FAIL */
+	/* Consider using C++ style, ofstream arq; arq.open(); arq << nome; */
+	
 	fwrite(&q_campos, sizeof (unsigned int), 1, arq);
  	
  	BOOLEANS buff;
-	for (int i = 0; i < q_campos, i++){
+	for (int i = 0; i < q_campos; i++){
 		buff.tem_default = tem_default.front();
 		buff.not_null = not_null.front();		
 		buff.unique = unique.front();		

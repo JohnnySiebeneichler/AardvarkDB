@@ -16,8 +16,12 @@ Funções e definições relacionadas ao formato de data usada no banco.
 
 
 */
+#ifndef DATA_H
+#define DATA_H
 
 #include <string>
+#include <cstdio>
+#include "byteio.h"
 
 typedef enum {
 
@@ -46,25 +50,23 @@ public:
         MES mes;
         int ano;
 
-
-
-public:
+//public:
         ERR data(FILE *f) {
 
                 check_file(f);
-                dia = (unsigned char) fgetc(f);
-                mes = (unsigned char) fgetc(f);
+                unsigned char dia = (unsigned char) fgetc(f);
+                unsigned char mes = (unsigned char) fgetc(f);
                 get_n_bytes(f, &ano, sizeof(int));
 
                 return SUCESSO;
         }
 
-        void ~data(); //impl
+        //void ~data(); //impl 
 
         /**
         * Retorna se o ano é ou não bissexto.
         **/
-        bool bissexto() {
+        bool bissexto(int &ano) {
                 return
                         (ano % 4 == 0 && (ano % 400 == 0 || ano % 100 != 0));
         }
@@ -74,14 +76,14 @@ public:
         **/
         bool verificar_validade() {
                 int monthlen[]= {31,28,31,30,31,30,31,31,30,31,30,31};
-                if (bissexto()(ano) && mes==2)
+                if (bissexto(ano) && mes==2)
                         monthlen[1]++;
                 return(dia<=monthlen[mes-1]);
 
         }
 
 
-        string get_nome_mes () {
+        std::string get_nome_mes (int mes) {
                 switch (mes) {
                 case JANEIRO:
                         return "Janeiro";
@@ -107,20 +109,10 @@ public:
                         return "Novembro";
                 case DEZEMBRO:
                         return "Dezembro";
-		default return "Mes inválido";
+		default: return "Mês inválido";
                 }
 
         }
-
-
-
-
-
-}
-
-
-
-
-}
-
+};
+#endif
 
