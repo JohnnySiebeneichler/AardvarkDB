@@ -10,8 +10,8 @@ todo: tudo (ler, escrever).
 
 
 */
-
-
+#ifndef TIPOS_H
+#define TIPOS_H
 
 #include <time.h>
 #include "byteio.h"
@@ -24,9 +24,9 @@ typedef enum {
 	sbyte,
 	ushint,
 	sshint,
-	uint,
+	_uint, /* uint and ulong have already been defined in <sys/types.h> */
 	sint,
-	ulong,
+	_ulong,
 	slong,
 	singleprec, //floating point de precisão simples.
 	doubleprec, //floating point de precisão dupla.
@@ -64,10 +64,10 @@ size_t get_tam(TIPO t) {
 	case ushint: return sizeof(unsigned short int);
 	case sshint: return sizeof(short int);
 
-	case uint: return sizeof(unsigned int);
+	case _uint: return sizeof(unsigned int);
 	case sint: return sizeof(int);
 
-	case ulong: return sizeof(unsigned long);
+	case _ulong: return sizeof(unsigned long);
 	case slong: return sizeof(long);
 
 	case singleprec: return sizeof(float);
@@ -106,14 +106,18 @@ void ler_valor(FILE *f, void *v, TIPO t, int n) {
 	switch (t) {
 
 	case data: {
-		*v = (data) new data(f);
+		//*v = (data) new data(f);
+		// You should not change v value, unless it was void **v
+		// Casting like (data) is not C++ style. 
+		// C++ style:
+		//	data *n = new data(f);
 		break;
 	}
-	case varchar_utf8: //
-	case varchar_utf16: //
-	case varchar_utf32: //
-	case fixchar_utf8: //
-	case fixchar_utf16: //
+	case varchar_utf8: ;//
+	case varchar_utf16: ;//
+	case varchar_utf32: ;//
+	case fixchar_utf8: ;//
+	case fixchar_utf16: ;//
 	case fixchar_utf32: {//
 		//ler_string(f, v, t, n);
 		fwrite(v, get_tam(t), n, f);
@@ -125,5 +129,4 @@ void ler_valor(FILE *f, void *v, TIPO t, int n) {
 	}
 }
 
-
-
+#endif

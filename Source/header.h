@@ -74,7 +74,7 @@ class Header {
 	public:
 		char nome_tabela[MAX_STR];
 		unsigned int q_campos;
-		char *nomes_campos[MAX_STR];
+		char **nomes_campos;
 		TIPO *tipos;
 		BOOLEANS *booleans;
 		unsigned int *tamanhos;
@@ -88,13 +88,13 @@ class Header {
 			@param arq O arquivo de header.
 			@return Identificador de erro.
 		*/
-		ERR Header(FILE *arq);
+		Header(FILE *arq); // Constructor DO NOT have return value.
 
 
 
 		/** Desaloca a memória alocada em uma header struct.
 		*/
-		void ~Header();
+		~Header();
 
 
 
@@ -148,7 +148,7 @@ class Header {
 			gina que consiste de: quantidade de registros na pági-
 			na, menor chave primária, e maior chave primária).
 		*/
-		void ler_info_pagina();
+		void ler_info_pagina(int &todo);
 
 
 
