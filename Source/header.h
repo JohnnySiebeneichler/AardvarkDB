@@ -9,19 +9,27 @@ Formato do arquivo de header (strings 0-finalized):
 
 -Nome da tabela. (string).
 -n = Quantidade de campos. (unsigned int).
--Nomes dos campos. (n * string).
--Tipos. (TIPO).
--Booleans. (byte) (se tem default, not null, unique, se é primary key,
-		se é foreign key).
--Tamanhos. (unsigned int) (para strings).
--Defaults. (var).
 
--Quant paginas
--Info Páginas
+n {
+	-Nomes dos campos. (string).
+	-Tipos. (TIPO).
+	-Booleans. (byte) (se tem default, not null, unique, se é primary key,
+			se é foreign key).
+	-Tamanhos. (unsigned int) (para strings).
+	-Defaults. (var).
+}
 
+quant foreign_key {
+	-Nome tabela referenciada.
+	-Nome campo referenciado.
+}
 
-to do: escrever
-separar .cpp dos .h
+-Quant páginas
+Quant páginas {
+	-quant registros na página
+	-menor pk da página
+	-maior pk da página
+}
 
 
 
@@ -68,6 +76,14 @@ typedef struct {
 }INFO_PAGINAS;
 
 
+/** Os dados de uma foreign key. Até eu achar uma classe boa para colocar vai a-
+	qui mesmo. :-D
+*/
+typedef struct {
+	string nome_tabela, nome_campo;
+}INFO_FK;
+
+
 class Header {
 
 
@@ -84,11 +100,14 @@ class Header {
 		INFO_PAGINAS paginas;
 
 
+
+
+
 		/** Lê um arquivo de header em uma estrutura de header.
 			@param arq O arquivo de header.
-			@return Identificador de erro.
+			@param err Ponteiro para identificador de erro.
 		*/
-		Header(FILE *arq); // Constructor DO NOT have return value.
+		Header(FILE *arq, ERR *err); // Constructor DO NOT have return value.
 
 
 
@@ -117,6 +136,12 @@ class Header {
 		int tam_pk;
 		FILE *ah;
 
+		//Offset de cada campo, para facilitar o acesso.
+		unsigned int *offsets;
+
+		//Quantidade total de bytes no banco.
+		size_t tam;
+
 
 		/** Aloca os vetores que armazenarão os dados do header.
 		*/
@@ -133,9 +158,14 @@ class Header {
 		/** Lê os valores das características das tuplas e armazena-os
 			nos vetores.
 		*/
-		void ler_vetores();
+		ERR ler_vetores();
 
 
+
+		/** Calcular a quantidade total de bytes por registro e o
+			offset de cada coluna.
+		*/
+		ERR calcular_offsets();
 
 
 		/** Calcula a quantidade total de bytes que serão necessários
@@ -163,25 +193,17 @@ class Header {
 
 
 
-/**
- * Esta função irá criar o arquivo de header das tabelas do
- * banco de dados com o seguinte formato:
- * 
- * -Nome da tabela. (string).
- * -n = Quantidade de campos. (unsigned int).
- * -Nomes dos campos. (n * string).
- * -Tipos. (TIPO).
- * -Booleans. (byte) (se tem default, not null, unique, se é primary key,
-		se é foreign key).
- * -Tamanhos. (unsigned int) (para strings).
- * -Defaults. (var).
- * 
- * Para os defaults, colunas sem default tem um ponteiro null.
- */
+
+/** Esta função irá criar o arquivo de header das tabelas do banco de dados com
+	o formato especificado no cabeçalho deste arquivo.
+*/
 ERR criar_arquivo_header(string nome, int q_campos, list<string> nomes,
 	list<TIPO> tipos, list<bool> tem_default, list<bool> not_null,
 	list<bool> unique, list<bool> pk, list<bool> fk,
-	list<unsigned int> tamanhos, list<void *> defaults);
+	list<unsigned int> tamanhos, list<void *> defaults,
+	list<INFO_FK> info_fks);
+
+
 
 
 

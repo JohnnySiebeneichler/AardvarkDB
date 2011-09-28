@@ -19,10 +19,7 @@ typedef enum {
 	ERR_PARAM,
 	ERR_PTR,
 	ERR_NOT_IMPL,
-	ERR_NOPEN,
-
-
-	HEADER_NENHUM_CAMPO
+	ERR_NOPEN
 }ERR;
 
 
@@ -30,6 +27,26 @@ typedef enum {
 #define check_ptr(ptr) if (!ptr) return ERR_PTR
 #define check_malloc(ptr) if (!ptr) return ERR_ALLOC
 #define check_erro(err) if (err != SUCESSO) return err
+
+#define set_file_err(file, errptr) if (!file) {\
+	*errptr = ERR_NOPEN;\
+	return;\
+}
+
+#define set_ptr_err(ptr, errptr) if (!ptr) {\
+	*errptr = ERR_NOPEN;\
+	return;\
+}
+
+#define set_malloc_err(ptr, errptr) if (!ptr) {\
+	*errptr = ERR_NOPEN;\
+	return;\
+}
+
+#define set_erro_err(err, errptr) if (err != SUCESSO) {\
+	*errptr = err;\
+	return;\
+}
 
 
 
@@ -44,10 +61,9 @@ std::string mensagem_de_erro(ERR err) {
 	case ERR_NOT_IMPL: return "Funcionalidade não implementada.";
 	case ERR_NOPEN: return "Não conseguiu abrir arquivo.";
 
-	case HEADER_NENHUM_CAMPO: return "Não há nenhum campo no header.";
-
 
 	default: return "Erro desconhecido.";
 	}
 }
+
 #endif
