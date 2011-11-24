@@ -1,0 +1,54 @@
+# depslib dependency file v1.0
+1321558543 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\header.cpp
+	"header.h"
+
+1321554158 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\header.h
+	<list>
+	<fstream>
+	<iostream>
+	<cstdlib>
+	"erros.h"
+	"tipos.h"
+	"coluna.h"
+
+1321554973 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\erros.h
+	<iostream>
+	<string>
+
+1321555104 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\tipos.h
+	<time.h>
+	"byteio.h"
+	"data.h"
+
+1321555028 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\byteio.h
+	<cstdio>
+	<iostream>
+	"erros.h"
+
+1320432510 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\data.h
+	<string>
+	<cstdio>
+	"byteio.h"
+
+1321554699 c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\coluna.h
+	<string>
+	<cstdlib>
+	"tipos.h"
+
+1321558431 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\main.cpp
+	<iostream>
+	"header.h"
+	"tipos.h"
+
+1321554786 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\coluna.cpp
+	"coluna.h"
+
+1321554966 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\erros.cpp
+	"erros.h"
+
+1321555033 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\byteio.cpp
+	"byteio.h"
+
+1321555106 source:c:\users\johnny\desktop\faculdade\banco\aardvarkdb\source\aardvarkdb\tipos.cpp
+	"tipos.h"
+
